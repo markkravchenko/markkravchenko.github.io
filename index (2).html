@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mark Kravchenko</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+<!-- Helvetica Neue used throughout — no external font needed -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --ink: #1a1a1a;
+    --ink-muted: #999999;
+    --ink-faint: #dddddd;
+    --accent: #1a1a1a;
+    --border: rgba(0,0,0,0.09);
+    --nav-h: 52px;
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--nav-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink); cursor: pointer; text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+  .nav-links a {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-muted); text-decoration: none;
+    transition: color 0.18s; cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+  .nav-links a.active { color: var(--ink); font-weight: 600; }
+
+  /* ── PAGE SYSTEM ── */
+  .page { display: none; padding-top: var(--nav-h); min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── MASONRY GRID (home + gallery pages) ── */
+  .masonry {
+    columns: 3;
+    column-gap: 3px;
+    padding: 3px;
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 3px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+  }
+  .masonry-item img {
+    width: 100%; display: block;
+    transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .masonry-item:hover img { transform: scale(1.03); }
+  .masonry-item .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
+    opacity: 0; transition: opacity 0.3s;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 1.25rem;
+  }
+  .masonry-item:hover .overlay { opacity: 1; }
+  .overlay-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px; font-weight: 600; color: #ffffff;
+    margin-bottom: 2px;
+  }
+  .overlay-meta {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .masonry-placeholder {
+    break-inside: avoid;
+    margin-bottom: 3px;
+    background: #efefef;
+    aspect-ratio: 3/4;
+    display: flex; align-items: center; justify-content: center;
+    color: #cccccc;
+  }
+  .masonry-placeholder svg { opacity: 0.18; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    padding: 3.5rem 2.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-eyebrow {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 0.75rem;
+  }
+  .page-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700; line-height: 1.0;
+    letter-spacing: -0.02em;
+  }
+  .page-sub {
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 13px; font-weight: 300; line-height: 1.8;
+    max-width: 480px;
+  }
+
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60vh; color: var(--ink-muted);
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* ── CONNECT PAGE ── */
+  .connect-wrap {
+    max-width: 560px;
+    padding: 4rem 2.5rem;
+  }
+  .connect-wrap h2 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 700; line-height: 1.0;
+    letter-spacing: -0.02em; margin-bottom: 2.5rem;
+  }
+  .connect-wrap h2 em { font-style: normal; color: var(--ink-muted); }
+  .connect-item {
+    border-top: 1px solid var(--border);
+    padding: 1.25rem 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .connect-label {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .connect-value {
+    font-size: 13px; color: var(--ink);
+    text-decoration: none; font-weight: 300;
+    transition: color 0.18s;
+  }
+  .connect-value:hover { color: var(--ink-muted); text-decoration: underline; }
+
+  /* ── CLIENTS PAGE ── */
+  .clients-wrap { padding: 0 2.5rem 4rem; }
+  .client-card {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 2rem; align-items: start;
+  }
+  .client-name {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px; font-weight: 600;
+  }
+  .client-desc {
+    font-size: 13px; color: var(--ink-muted);
+    font-weight: 300; line-height: 1.8;
+  }
+  .client-btn {
+    display: inline-block;
+    padding: 9px 20px;
+    border: 1px solid var(--ink-faint);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); text-decoration: none;
+    transition: all 0.18s; white-space: nowrap; cursor: pointer;
+    background: none;
+  }
+  .client-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(255,255,255,0.97);
+    align-items: center; justify-content: center;
+    padding: 2rem; backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-img-wrap {
+    max-width: min(90vw, 1100px);
+    max-height: 90vh;
+    position: relative;
+  }
+  .modal-img-wrap img {
+    max-width: 100%; max-height: 88vh;
+    object-fit: contain; display: block;
+  }
+  .modal-caption {
+    margin-top: 0.75rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-caption-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  .modal-caption-meta {
+    font-size: 11px; color: var(--ink-muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .modal-close {
+    position: fixed; top: 1.5rem; right: 1.5rem;
+    background: none; border: none;
+    font-size: 22px; color: var(--ink-muted);
+    cursor: pointer; line-height: 1;
+    transition: color 0.18s;
+  }
+  .modal-close:hover { color: var(--ink); }
+  .modal-prev, .modal-next {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    background: none; border: none;
+    font-size: 28px; color: var(--ink-muted);
+    cursor: pointer; padding: 1rem;
+    transition: color 0.18s; line-height: 1;
+  }
+  .modal-prev { left: 1rem; }
+  .modal-next { right: 1rem; }
+  .modal-prev:hover, .modal-next:hover { color: var(--ink); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.25rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-copy { font-size: 11px; color: var(--ink-faint); }
+  .footer-loc  { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .page.active { animation: fadeUp 0.3s ease both; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) { .masonry { columns: 2; } }
+  @media (max-width: 560px) {
+    .masonry { columns: 1; }
+    nav { padding: 0 1.25rem; }
+    .nav-links { gap: 1.25rem; }
+    .page-header { padding: 2.5rem 1.25rem 1.5rem; }
+    .connect-wrap { padding: 3rem 1.25rem; }
+    .clients-wrap { padding: 0 1.25rem 3rem; }
+    .client-card { grid-template-columns: 1fr; gap: 0.75rem; }
+    footer { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" onclick="showPage('home')">Mark Kravchenko</a>
+  <ul class="nav-links">
+    <li><a onclick="showPage('people')"  id="nav-people">People</a></li>
+    <li><a onclick="showPage('places')"  id="nav-places">Places</a></li>
+    <li><a onclick="showPage('things')"  id="nav-things">Things</a></li>
+    <li><a onclick="showPage('clients')" id="nav-clients">Clients</a></li>
+    <li><a onclick="showPage('connect')" id="nav-connect">Connect</a></li>
+  </ul>
+</nav>
+
+<!-- ── HOME ── -->
+<div class="page active" id="page-home">
+  <div class="loading" id="home-loading">Loading…</div>
+  <div class="masonry" id="home-grid" style="display:none"></div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── PEOPLE ── -->
+<div class="page" id="page-people">
+  <div class="page-header">
+    <p class="page-eyebrow">Portfolio</p>
+    <h1 class="page-title">People</h1>
+    <p class="page-sub">Portraits and lifestyle photography — candid moments, outdoor adventurers, and the faces behind the expeditions.</p>
+  </div>
+  <div class="loading" id="people-loading">Loading…</div>
+  <div class="masonry" id="people-grid" style="display:none"></div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── PLACES ── -->
+<div class="page" id="page-places">
+  <div class="page-header">
+    <p class="page-eyebrow">Portfolio</p>
+    <h1 class="page-title">Places</h1>
+    <p class="page-sub">Landscapes, coastlines, rivers, and wilderness — the geography of Atlantic and Eastern Canada through a cinematic lens.</p>
+  </div>
+  <div class="loading" id="places-loading">Loading…</div>
+  <div class="masonry" id="places-grid" style="display:none"></div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── THINGS ── -->
+<div class="page" id="page-things">
+  <div class="page-header">
+    <p class="page-eyebrow">Portfolio</p>
+    <h1 class="page-title">Things</h1>
+    <p class="page-sub">Gear, catches, camp setups, and still life — the objects and details that make the outdoors what it is.</p>
+  </div>
+  <div class="loading" id="things-loading">Loading…</div>
+  <div class="masonry" id="things-grid" style="display:none"></div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── CLIENTS ── -->
+<div class="page" id="page-clients">
+  <div class="page-header">
+    <p class="page-eyebrow">Client work</p>
+    <h1 class="page-title">Clients</h1>
+    <p class="page-sub">Each client gets a private gallery link — your photos, downloadable, no account needed.</p>
+  </div>
+  <div class="clients-wrap" id="clients-list">
+    <!-- Client cards are added here. Example below — duplicate and edit for each client.
+         The "href" links to a hidden client page, e.g. clients/smith-wedding-2024.html -->
+    <div class="client-card">
+      <div>
+        <p class="client-name">Smith Wedding</p>
+        <p style="font-size:11px;color:var(--ink-muted);margin-top:4px;letter-spacing:0.06em;text-transform:uppercase;">June 2024</p>
+      </div>
+      <p class="client-desc">Cape Breton, Nova Scotia. 3-day outdoor wedding shoot across the highlands and coastline.</p>
+      <a class="client-btn" href="clients/smith-wedding-2024.html">View Gallery →</a>
+    </div>
+    <div class="client-card">
+      <div>
+        <p class="client-name">Nova Outfitters</p>
+        <p style="font-size:11px;color:var(--ink-muted);margin-top:4px;letter-spacing:0.06em;text-transform:uppercase;">August 2024</p>
+      </div>
+      <p class="client-desc">Product and lifestyle photography for an outdoor gear brand — rivers, camps, and gear in the wild.</p>
+      <a class="client-btn" href="clients/nova-outfitters-2024.html">View Gallery →</a>
+    </div>
+  </div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── CONNECT ── -->
+<div class="page" id="page-connect">
+  <div class="connect-wrap">
+    <h2>Let's make<br><em>something.</em></h2>
+    <div class="connect-item">
+      <span class="connect-label">Email</span>
+      <a class="connect-value" href="mailto:hello@markkravchenko.ca">hello@markkravchenko.ca</a>
+    </div>
+    <div class="connect-item">
+      <span class="connect-label">Instagram</span>
+      <a class="connect-value" href="#" target="_blank">@markkravchenko</a>
+    </div>
+    <div class="connect-item">
+      <span class="connect-label">YouTube</span>
+      <a class="connect-value" href="#" target="_blank">Mark Kravchenko</a>
+    </div>
+    <div class="connect-item">
+      <span class="connect-label">Location</span>
+      <span class="connect-value">East Coast Canada</span>
+    </div>
+  </div>
+  <footer>
+    <span class="footer-copy">© 2026 Mark Kravchenko</span>
+    <span class="footer-loc">East Coast Canada</span>
+  </footer>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <button class="modal-prev" onclick="modalNav(-1)">&#8592;</button>
+  <button class="modal-next" onclick="modalNav(1)">&#8594;</button>
+  <div class="modal-img-wrap">
+    <img id="modal-img" src="" alt="">
+    <div class="modal-caption">
+      <span class="modal-caption-title" id="modal-title"></span>
+      <span class="modal-caption-meta"  id="modal-meta"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+================================================================
+  HOW THE JSON SYSTEM WORKS
+  ----------------------------------------------------------------
+  Each page loads its photos from a JSON file in the /photos/ folder.
+  You never need to edit this HTML file to add photos.
+
+  FOLDER STRUCTURE IN YOUR GITHUB REPO:
+  ├── index.html          ← this file
+  ├── photos/
+  │   ├── home.json
+  │   ├── people.json
+  │   ├── places.json
+  │   ├── things.json
+  │   ├── home/           ← drop photos here
+  │   ├── people/         ← drop photos here
+  │   ├── places/         ← drop photos here
+  │   └── things/         ← drop photos here
+  └── clients/
+      ├── smith-wedding-2024.html
+      └── nova-outfitters-2024.html
+
+  JSON FORMAT (e.g. photos/places.json):
+  [
+    { "src": "photos/places/cape-breton-dawn.jpg", "title": "Cape Breton Dawn", "meta": "Nova Scotia · 2024" },
+    { "src": "photos/places/fundy-fog.jpg",        "title": "Bay of Fundy Fog",  "meta": "New Brunswick · 2024" }
+  ]
+
+  TO ADD PHOTOS:
+  1. Upload your image to the matching folder (e.g. photos/places/)
+  2. Add one line to the matching JSON file (e.g. photos/places.json)
+  3. Commit — done. No HTML editing needed.
+================================================================
+*/
+
+  const PAGES = ['home', 'people', 'places', 'things'];
+
+  // Cache so we don't re-fetch on every page visit
+  const cache = {};
+
+  // Active photo set and index for modal navigation
+  let activePhotos = [];
+  let activeIndex  = 0;
+
+  /* ── PAGE NAVIGATION ── */
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-links a').forEach(function(a) { a.classList.remove('active'); });
+    document.getElementById('page-' + name).classList.add('active');
+    var navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo(0, 0);
+
+    // Load grid pages
+    if (PAGES.includes(name)) loadGrid(name);
+  }
+
+  /* ── GRID LOADER ── */
+  function loadGrid(page) {
+    var grid    = document.getElementById(page + '-grid');
+    var loading = document.getElementById(page + '-loading');
+    if (!grid) return;
+
+    // Already loaded
+    if (cache[page]) {
+      renderGrid(page, cache[page]);
+      return;
+    }
+
+    // Fetch JSON
+    fetch('photos/' + page + '.json?v=' + Date.now())
+      .then(function(r) {
+        if (!r.ok) throw new Error('No JSON');
+        return r.json();
+      })
+      .then(function(photos) {
+        cache[page] = photos;
+        renderGrid(page, photos);
+      })
+      .catch(function() {
+        // No JSON yet — show placeholder tiles so the layout is visible
+        cache[page] = [];
+        renderGrid(page, []);
+      });
+  }
+
+  function renderGrid(page, photos) {
+    var grid    = document.getElementById(page + '-grid');
+    var loading = document.getElementById(page + '-loading');
+
+    if (loading) loading.style.display = 'none';
+    grid.style.display = 'block';
+
+    if (photos.length === 0) {
+      grid.innerHTML = '<div style="padding:4rem 2.5rem;color:var(--ink-muted);font-size:13px;">' +
+        'No photos yet — add images to <code style="color:var(--accent)">photos/' + page + '/</code> ' +
+        'and update <code style="color:var(--accent)">photos/' + page + '.json</code>.' +
+        '</div>';
+      return;
+    }
+
+    grid.innerHTML = photos.map(function(p, i) {
+      return '<div class="masonry-item" onclick="openModal(\'' + page + '\',' + i + ')">' +
+        '<img src="' + p.src + '" alt="' + (p.title || '') + '" loading="lazy">' +
+        '<div class="overlay">' +
+        (p.title ? '<p class="overlay-title">' + p.title + '</p>' : '') +
+        (p.meta  ? '<p class="overlay-meta">'  + p.meta  + '</p>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+
+  /* ── MODAL ── */
+  function openModal(page, index) {
+    activePhotos = cache[page] || [];
+    activeIndex  = index;
+    showModalPhoto();
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function showModalPhoto() {
+    var p = activePhotos[activeIndex];
+    if (!p) return;
+    document.getElementById('modal-img').src   = p.src;
+    document.getElementById('modal-img').alt   = p.title || '';
+    document.getElementById('modal-title').textContent = p.title || '';
+    document.getElementById('modal-meta').textContent  = p.meta  || '';
+  }
+
+  function modalNav(dir) {
+    activeIndex = (activeIndex + dir + activePhotos.length) % activePhotos.length;
+    showModalPhoto();
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleModalClick(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('modal').classList.contains('open')) return;
+    if (e.key === 'Escape')     closeModal();
+    if (e.key === 'ArrowLeft')  modalNav(-1);
+    if (e.key === 'ArrowRight') modalNav(1);
+  });
+
+  /* ── INIT ── */
+  loadGrid('home');
+</script>
+</body>
+</html>
